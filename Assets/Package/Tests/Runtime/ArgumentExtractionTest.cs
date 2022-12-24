@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace BroWar.Tests.Debugging
+namespace BroWar.Debugging.Tests
 {
     using BroWar.Debugging.Console;
 
