@@ -1,1 +1,8 @@
-# <package_name>
+# Debugging
+
+### Structure
+```
+├── Editor
+├── Runtime
+├── Tests
+```
