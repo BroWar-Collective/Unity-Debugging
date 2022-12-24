@@ -1,13 +1,19 @@
 {
-  "name": "com.browar.TODO",
-  "displayName": "TODO",
-  "version": "0.0.0",
+  "name": "com.browar.debugging",
+  "displayName": "Debugging",
+  "version": "1.0.0",
   "unity": "2018.1",
-  "description": "TODO.",
+  "description": "Collection of debug scripts and systems.",
   "keywords": [
-    "TODO",
+    "debugging",
+	"debug"
   ],
-  "category": "TODO",
+  "category": "Debug",
+  "dependencies": {
+	"com.browar.common": "1.0.0",
+	"com.browar.editor-toolbox": "0.12.0",
+	"com.unity.inputsystem": "1.3.0"
+  },
   "author": {
     "name": "BroWar Collective",
     "email": "browar.collective@gmail.com",
