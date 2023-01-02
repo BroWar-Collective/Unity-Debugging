@@ -14,7 +14,7 @@ namespace BroWar.Debugging.Console
     /// Manager for registering/unregistering and invoking console commands and storing input history.
     /// Uses commands stored in <see cref="commandsRepository"/> as an initial commands set.
     /// </summary>
-    [AddComponentMenu("LowPolis/Debugging/Console/Console Manager")]
+    [AddComponentMenu("BroWar/Debugging/Console/Console Manager")]
     public class ConsoleManager : MonoBehaviour, IConsoleManager
     {
         [Title("Settings")]
