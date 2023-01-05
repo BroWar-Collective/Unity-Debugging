@@ -51,6 +51,8 @@ namespace BroWar.Debugging.Console
 
         private Dictionary<Key, Action> inputKeysToActions;
 
+        private AutocompleteHandler autocompleteHandler;
+
         private void Update()
         {
             if (IsKeyPressed(inputSettings.TriggerKey))
@@ -62,6 +64,8 @@ namespace BroWar.Debugging.Console
             {
                 return;
             }
+
+            UpdateAutocomplete();
 
             foreach (var item in inputKeysToActions)
             {
@@ -99,6 +103,7 @@ namespace BroWar.Debugging.Console
             using (var scrollView = new GUILayout.ScrollViewScope(scrollPosition))
             {
                 scrollPosition = scrollView.scrollPosition;
+                Debug.Log(scrollPosition);
                 GUILayout.Label(printedText, Style.consoleBodyStyle, GUILayout.ExpandHeight(true));
             }
 
@@ -147,9 +152,23 @@ namespace BroWar.Debugging.Console
                 { inputSettings.PrevCommandKey, FetchPrevCommand }
             };
 
+            autocompleteHandler = new AutocompleteHandler();
             windowRect = styleSettings.InitialRect;
             scrollPosition = Vector2.zero;
             isInitialized = true;
+        }
+
+        private void UpdateAutocomplete()
+        {
+            if (currentInput == null)
+            {
+                return;
+            }
+
+            var splitInput = currentInput.Split(' ');
+            autocompleteHandler.RefreshOptions(consoleManager, splitInput, splitInput.Length - 1);
+            var bestMatch = autocompleteHandler.GetBestMatch(currentInput);
+            Debug.Log(bestMatch);
         }
 
         private void InvokeInputString()

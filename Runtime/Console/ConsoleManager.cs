@@ -15,7 +15,7 @@ namespace BroWar.Debugging.Console
     /// Uses commands stored in <see cref="commandsRepository"/> as an initial commands set.
     /// </summary>
     [AddComponentMenu("BroWar/Debugging/Console/Console Manager")]
-    public class ConsoleManager : MonoBehaviour, IConsoleManager
+    public class ConsoleManager : MonoBehaviour, IConsoleManager, IAutocompleteOptionProvider
     {
         [Title("Settings")]
         [SerializeField, FormerlySerializedAs("consoleManagerSettings"), IgnoreParent]
@@ -169,6 +169,18 @@ namespace BroWar.Debugging.Console
             }
         }
 
+        //@TODO: rething parameter name
+        private void AddCommandNames(IList<string> optionList)
+        {
+            var commandsRepository = settings.CommandsRepository;
+            var commandsList = commandsRepository.commands;
+
+            foreach (var command in commandsList)
+            {
+                optionList.Add(command.name);
+            }
+        }
+
         public void AppendCommand(ConsoleCommand command)
         {
             EnsureInitialized();
@@ -257,6 +269,28 @@ namespace BroWar.Debugging.Console
         public void LoadHistory()
         {
             InputHistory.LoadHistory();
+        }
+
+        public void GetParemeterAutocompleteOptions(string[] words, int wordIndex, IList<string> optionList)
+        {
+            if (wordIndex == 0)
+            {
+                AddCommandNames(optionList);
+            }
+            else
+            {
+                //@TODO: property? used in 3 places
+                var commandsRepository = settings.CommandsRepository;
+                var commandsList = commandsRepository.commands;
+
+                foreach (ConsoleCommand consoleCommand in commandsList)
+                {
+                    if (consoleCommand is IAutocompleteOptionProvider commandAutocomplete)
+                    {
+                        commandAutocomplete.GetParemeterAutocompleteOptions(words, wordIndex, optionList);
+                    }
+                }
+            }
         }
 
         private ConsoleHistory InputHistory
