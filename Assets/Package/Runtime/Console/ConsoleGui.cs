@@ -100,10 +100,10 @@ namespace BroWar.Debugging.Console
         {
             Style.consoleTextStyle.normal.textColor = styleSettings.TextColor;
             Style.consoleBodyStyle.normal.textColor = styleSettings.TextColor;
+
             using (var scrollView = new GUILayout.ScrollViewScope(scrollPosition))
             {
                 scrollPosition = scrollView.scrollPosition;
-                Debug.Log(scrollPosition);
                 GUILayout.Label(printedText, Style.consoleBodyStyle, GUILayout.ExpandHeight(true));
             }
 
@@ -189,6 +189,7 @@ namespace BroWar.Debugging.Console
             printedText = printedTextBuilder.ToString();
             printedText = printedText.TrimEnd();
             currentInput = string.Empty;
+            MoveScrollToBottom();
         }
 
         private string ParseResultToString(object resultObject)
@@ -289,6 +290,11 @@ namespace BroWar.Debugging.Console
             }
 
             return windowPosition;
+        }
+
+        private void MoveScrollToBottom()
+        {
+            scrollPosition.y = float.MaxValue;
         }
 
         public void Toggle()
