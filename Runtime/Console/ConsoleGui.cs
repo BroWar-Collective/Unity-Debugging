@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -133,6 +134,11 @@ namespace BroWar.Debugging.Console
                 }
             }
 
+            using (new GUILayout.HorizontalScope())
+            {
+                GUILayout.Label(autocompleteHandler.GetBestMatch(currentInput.Split(' ').Last()));
+            }
+
             GUI.DragWindow(new Rect(0, 0, Screen.width, Screen.height));
         }
 
@@ -160,15 +166,13 @@ namespace BroWar.Debugging.Console
 
         private void UpdateAutocomplete()
         {
-            if (currentInput == null)
+            if (string.IsNullOrEmpty(currentInput))
             {
                 return;
             }
 
             var splitInput = currentInput.Split(' ');
             autocompleteHandler.RefreshOptions(consoleManager, splitInput, splitInput.Length - 1);
-            var bestMatch = autocompleteHandler.GetBestMatch(currentInput);
-            Debug.Log(bestMatch);
         }
 
         private void InvokeInputString()

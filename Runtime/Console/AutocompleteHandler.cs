@@ -17,9 +17,14 @@ namespace BroWar.Debugging.Console
 
         public string GetBestMatch(string currentInput)
         {
+            if (string.IsNullOrEmpty(currentInput))
+            {
+                return optionList.Count > 0 ? optionList[0] : string.Empty;
+            }
+
             foreach (var option in optionList)
             {
-                if (option.ToLower().Contains(currentInput.ToLower()))
+                if (option.ToLower().StartsWith(currentInput.ToLower()))
                 {
                     return option;
                 }
