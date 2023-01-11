@@ -169,18 +169,6 @@ namespace BroWar.Debugging.Console
             }
         }
 
-        //@TODO: rething parameter name
-        private void AddCommandNames(IList<string> optionList)
-        {
-            var commandsRepository = settings.CommandsRepository;
-            var commandsList = commandsRepository.commands;
-
-            foreach (var command in commandsList)
-            {
-                optionList.Add(command.name);
-            }
-        }
-
         public void AppendCommand(ConsoleCommand command)
         {
             EnsureInitialized();
@@ -271,24 +259,28 @@ namespace BroWar.Debugging.Console
             InputHistory.LoadHistory();
         }
 
-        public void GetParemeterAutocompleteOptions(string[] words, int wordIndex, IList<string> optionList)
+        void IAutocompleteOptionProvider.GetParemeterAutocompleteOptions(string[] words, int wordIndex, IList<string> optionList)
         {
+            EnsureInitialized();
+
             if (wordIndex == 0)
             {
-                AddCommandNames(optionList);
+                foreach (var commandName in RegisteredMethods.Keys.ToArray())
+                {
+                    if (optionList.Contains(commandName))
+                    {
+                        continue;
+                    }
+
+                    optionList.Add(commandName);
+                }
             }
             else
             {
-                //@TODO: property? used in 3 places
-                var commandsRepository = settings.CommandsRepository;
-                var commandsList = commandsRepository.commands;
-
-                foreach (ConsoleCommand consoleCommand in commandsList)
+                var command = namesToInstances[words[0]];
+                if (command is IAutocompleteOptionProvider commandAutocompleteProvider)
                 {
-                    if (consoleCommand is IAutocompleteOptionProvider commandAutocomplete)
-                    {
-                        commandAutocomplete.GetParemeterAutocompleteOptions(words, wordIndex, optionList);
-                    }
+                    commandAutocompleteProvider.GetParemeterAutocompleteOptions(words, wordIndex, optionList);
                 }
             }
         }
