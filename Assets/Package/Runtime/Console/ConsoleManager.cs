@@ -146,7 +146,7 @@ namespace BroWar.Debugging.Console
             return false;
         }
 
-        private void RegistorMethodFromCommand(ConsoleCommand command, MethodInfo method)
+        private void RegisterMethodFromCommand(ConsoleCommand command, MethodInfo method)
         {
             var commandName = method.Name.ToLower();
             if (namesToMethods.TryGetValue(commandName, out var methodsGroup))
@@ -176,7 +176,7 @@ namespace BroWar.Debugging.Console
             var commandInfo = commandType.GetTypeInfo();
             foreach (var method in commandInfo.DeclaredMethods.Where(method => method.IsPublic))
             {
-                RegistorMethodFromCommand(command, method);
+                RegisterMethodFromCommand(command, method);
             }
         }
 
