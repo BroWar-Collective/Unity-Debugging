@@ -35,11 +35,10 @@ namespace BroWar.Debugging.Console
                 return;
             }
 
-            isInitialized = true;
-            InitializeCache();
             ValidateSettings();
             InitializeHistory();
             InitializeCommands();
+            isInitialized = true;
         }
 
         private void ValidateSettings()
@@ -63,6 +62,8 @@ namespace BroWar.Debugging.Console
 
         private void InitializeCommands()
         {
+            InitializeCache();
+
             var commandsRepository = settings.CommandsRepository;
             var commandsList = commandsRepository.commands;
             for (int i = 0; i < commandsList.Count; i++)
@@ -171,8 +172,6 @@ namespace BroWar.Debugging.Console
 
         public void AppendCommand(ConsoleCommand command)
         {
-            EnsureInitialized();
-
             var commandType = command.GetType();
             var commandInfo = commandType.GetTypeInfo();
             foreach (var method in commandInfo.DeclaredMethods.Where(method => method.IsPublic))
