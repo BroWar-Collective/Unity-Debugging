@@ -27,18 +27,23 @@ namespace BroWar.Debugging.Console
         private ConsoleHistory inputHistory;
 
         private bool isInitialized;
+        private bool isInitializing;
 
         private void EnsureInitialized()
         {
-            if (isInitialized)
+            if (isInitialized || isInitializing)
             {
                 return;
             }
 
+            isInitializing = true;
+
             ValidateSettings();
             InitializeHistory();
             InitializeCommands();
+
             isInitialized = true;
+            isInitializing = false;
         }
 
         private void ValidateSettings()
@@ -172,6 +177,8 @@ namespace BroWar.Debugging.Console
 
         public void AppendCommand(ConsoleCommand command)
         {
+            EnsureInitialized();
+
             var commandType = command.GetType();
             var commandInfo = commandType.GetTypeInfo();
             foreach (var method in commandInfo.DeclaredMethods.Where(method => method.IsPublic))
