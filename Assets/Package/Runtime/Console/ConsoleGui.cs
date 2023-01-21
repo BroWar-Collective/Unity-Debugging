@@ -44,7 +44,6 @@ namespace BroWar.Debugging.Console
         private Vector2 scrollPosition;
 
         private string printedText;
-        private string previousInput;
         private string currentInput;
         private string currentAutocompleteMatch;
         private StringBuilder printedTextBuilder;
@@ -76,11 +75,6 @@ namespace BroWar.Debugging.Console
                     var action = item.Value;
                     action.Invoke();
                 }
-            }
-
-            if (currentInput != previousInput)
-            {
-                UpdateAutocomplete();
             }
         }
 
@@ -115,8 +109,12 @@ namespace BroWar.Debugging.Console
             using (new GUILayout.HorizontalScope())
             {
                 GUI.SetNextControlName(inputFieldControlName);
-                previousInput = currentInput;
+                string previousInput = currentInput;
                 currentInput = GUILayout.TextField(currentInput, Style.consoleTextStyle);
+                if (previousInput != currentInput)
+                {
+                    InputChanged();
+                }
                 if (forceInputFocus)
                 {
                     GUI.FocusControl(inputFieldControlName);
@@ -171,6 +169,11 @@ namespace BroWar.Debugging.Console
             windowRect = styleSettings.InitialRect;
             scrollPosition = Vector2.zero;
             isInitialized = true;
+        }
+
+        private void InputChanged()
+        {
+            UpdateAutocomplete();
         }
 
         private void UpdateAutocomplete()

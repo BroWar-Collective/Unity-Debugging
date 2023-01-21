@@ -21,6 +21,16 @@ namespace BroWar.Debugging.Console.Commands
                     optionList.Add("Warsaw");
                     optionList.Add("Krakow");
                     break;
+                case 2:
+                    optionList.Add("jest");
+                    optionList.Add("byl");
+                    optionList.Add("bedzie");
+                    break;
+                case 3:
+                    optionList.Add("piekny");
+                    optionList.Add("brzydki");
+                    optionList.Add("zwykly");
+                    break;
             }
         }
     }
