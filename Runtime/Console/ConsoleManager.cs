@@ -277,6 +277,11 @@ namespace BroWar.Debugging.Console
             }
             else
             {
+                if (!namesToInstances.ContainsKey(words[0]))
+                {
+                    return;
+                }
+
                 var command = namesToInstances[words[0]];
                 if (command is IAutocompleteOptionProvider commandAutocompleteProvider)
                 {

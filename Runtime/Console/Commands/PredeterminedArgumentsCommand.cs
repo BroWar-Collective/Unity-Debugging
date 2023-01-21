@@ -16,6 +16,7 @@ namespace BroWar.Debugging.Console.Commands
             switch (wordIndex)
             {
                 case 1:
+                    optionList.Add("Wroclawski");
                     optionList.Add("Wroclaw");
                     optionList.Add("Warsaw");
                     optionList.Add("Krakow");

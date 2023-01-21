@@ -44,7 +44,9 @@ namespace BroWar.Debugging.Console
         private Vector2 scrollPosition;
 
         private string printedText;
+        private string previousInput;
         private string currentInput;
+        private string currentAutocompleteMatch;
         private StringBuilder printedTextBuilder;
 
         private bool updateCursorPosition;
@@ -66,8 +68,6 @@ namespace BroWar.Debugging.Console
                 return;
             }
 
-            UpdateAutocomplete();
-
             foreach (var item in inputKeysToActions)
             {
                 var inputKey = item.Key;
@@ -77,6 +77,8 @@ namespace BroWar.Debugging.Console
                     action.Invoke();
                 }
             }
+
+            UpdateAutocomplete();
         }
 
         private void OnGUI()
@@ -111,6 +113,7 @@ namespace BroWar.Debugging.Console
             using (new GUILayout.HorizontalScope())
             {
                 GUI.SetNextControlName(inputFieldControlName);
+                previousInput = currentInput;
                 currentInput = GUILayout.TextField(currentInput, Style.consoleTextStyle);
                 if (forceInputFocus)
                 {
@@ -136,7 +139,10 @@ namespace BroWar.Debugging.Console
 
             using (new GUILayout.HorizontalScope())
             {
-                GUILayout.Label(autocompleteHandler.GetBestMatch(currentInput.Split(' ').Last()));
+                if (!string.IsNullOrEmpty(currentAutocompleteMatch))
+                {
+                    GUILayout.Label($"{currentAutocompleteMatch} (Press {inputSettings.AutocompleteKey} to apply)");
+                }
             }
 
             GUI.DragWindow(new Rect(0, 0, Screen.width, Screen.height));
@@ -155,7 +161,8 @@ namespace BroWar.Debugging.Console
             {
                 { inputSettings.ConfirmationKey, InvokeInputString },
                 { inputSettings.NextCommandKey, FetchNextCommand },
-                { inputSettings.PrevCommandKey, FetchPrevCommand }
+                { inputSettings.PrevCommandKey, FetchPrevCommand },
+                { inputSettings.AutocompleteKey, PerformAutocomplete }
             };
 
             autocompleteHandler = new AutocompleteHandler();
@@ -168,11 +175,18 @@ namespace BroWar.Debugging.Console
         {
             if (string.IsNullOrEmpty(currentInput))
             {
+                currentAutocompleteMatch = string.Empty;
+                return;
+            }
+
+            if (currentInput == previousInput)
+            {
                 return;
             }
 
             var splitInput = currentInput.Split(' ');
             autocompleteHandler.RefreshOptions(consoleManager, splitInput, splitInput.Length - 1);
+            currentAutocompleteMatch = autocompleteHandler.GetBestMatch(currentInput.Split(' ').Last());
         }
 
         private void InvokeInputString()
@@ -239,6 +253,26 @@ namespace BroWar.Debugging.Console
                 currentInput = entry;
                 updateCursorPosition = true;
             }
+        }
+
+        private void PerformAutocomplete()
+        {
+            if (string.IsNullOrEmpty(currentAutocompleteMatch))
+            {
+                return;
+            }
+
+            if (currentInput.Contains(' '))
+            {
+                currentInput = currentInput.Trim().Substring(0, currentInput.LastIndexOf(' '));
+                currentInput = currentInput + ' ' + currentAutocompleteMatch;
+            }
+            else
+            {
+                currentInput = currentAutocompleteMatch;
+            }
+
+            updateCursorPosition = true;
         }
 
         private bool IsKeyPressed(Key key)
