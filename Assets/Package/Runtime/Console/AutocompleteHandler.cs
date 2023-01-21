@@ -11,10 +11,11 @@ namespace BroWar.Debugging.Console
         private string GetShortestValidMatchStarting(string word)
         {
             string bestMatch = string.Empty;
+            word = word.ToLower();
 
             foreach (var option in optionList)
             {
-                if (option.ToLower().StartsWith(word.ToLower())
+                if (option.ToLower().StartsWith(word)
                    && !option.Equals(word))
                 {
                     if (string.IsNullOrEmpty(bestMatch) || option.Length < bestMatch.Length)
@@ -30,10 +31,11 @@ namespace BroWar.Debugging.Console
         private string GetShortestValidMatchContaining(string word)
         {
             string bestMatch = string.Empty;
+            word = word.ToLower();
 
             foreach (var option in optionList)
             {
-                if (option.ToLower().Contains(word.ToLower())
+                if (option.ToLower().Contains(word)
                    && !option.Equals(word))
                 {
                     bestMatch = option;
