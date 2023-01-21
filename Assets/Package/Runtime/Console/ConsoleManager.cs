@@ -27,19 +27,23 @@ namespace BroWar.Debugging.Console
         private ConsoleHistory inputHistory;
 
         private bool isInitialized;
+        private bool isInitializing;
 
         private void EnsureInitialized()
         {
-            if (isInitialized)
+            if (isInitialized || isInitializing)
             {
                 return;
             }
 
-            isInitialized = true;
-            InitializeCache();
+            isInitializing = true;
+
             ValidateSettings();
             InitializeHistory();
             InitializeCommands();
+
+            isInitialized = true;
+            isInitializing = false;
         }
 
         private void ValidateSettings()
@@ -63,6 +67,8 @@ namespace BroWar.Debugging.Console
 
         private void InitializeCommands()
         {
+            InitializeCache();
+
             var commandsRepository = settings.CommandsRepository;
             var commandsList = commandsRepository.commands;
             for (int i = 0; i < commandsList.Count; i++)
@@ -145,7 +151,7 @@ namespace BroWar.Debugging.Console
             return false;
         }
 
-        private void RegistorMethodFromCommand(ConsoleCommand command, MethodInfo method)
+        private void RegisterMethodFromCommand(ConsoleCommand command, MethodInfo method)
         {
             var commandName = method.Name.ToLower();
             if (namesToMethods.TryGetValue(commandName, out var methodsGroup))
@@ -177,7 +183,7 @@ namespace BroWar.Debugging.Console
             var commandInfo = commandType.GetTypeInfo();
             foreach (var method in commandInfo.DeclaredMethods.Where(method => method.IsPublic))
             {
-                RegistorMethodFromCommand(command, method);
+                RegisterMethodFromCommand(command, method);
             }
         }
 
