@@ -78,7 +78,10 @@ namespace BroWar.Debugging.Console
                 }
             }
 
-            UpdateAutocomplete();
+            if (currentInput != previousInput)
+            {
+                UpdateAutocomplete();
+            }
         }
 
         private void OnGUI()
@@ -103,7 +106,6 @@ namespace BroWar.Debugging.Console
         {
             Style.consoleTextStyle.normal.textColor = styleSettings.TextColor;
             Style.consoleBodyStyle.normal.textColor = styleSettings.TextColor;
-
             using (var scrollView = new GUILayout.ScrollViewScope(scrollPosition))
             {
                 scrollPosition = scrollView.scrollPosition;
@@ -179,14 +181,9 @@ namespace BroWar.Debugging.Console
                 return;
             }
 
-            if (currentInput == previousInput)
-            {
-                return;
-            }
-
             var splitInput = currentInput.Split(' ');
             autocompleteHandler.RefreshOptions(consoleManager, splitInput, splitInput.Length - 1);
-            currentAutocompleteMatch = autocompleteHandler.GetBestMatch(currentInput.Split(' ').Last());
+            currentAutocompleteMatch = autocompleteHandler.GetBestMatch(splitInput.Last());
         }
 
         private void InvokeInputString()
@@ -265,7 +262,7 @@ namespace BroWar.Debugging.Console
             if (currentInput.Contains(' '))
             {
                 currentInput = currentInput.Trim().Substring(0, currentInput.LastIndexOf(' '));
-                currentInput = currentInput + ' ' + currentAutocompleteMatch;
+                currentInput = $"{currentInput} {currentAutocompleteMatch}";
             }
             else
             {
