@@ -115,6 +115,7 @@ namespace BroWar.Debugging.Console
                 {
                     InputChanged();
                 }
+
                 if (forceInputFocus)
                 {
                     GUI.FocusControl(inputFieldControlName);
