@@ -259,13 +259,13 @@ namespace BroWar.Debugging.Console
             InputHistory.LoadHistory();
         }
 
-        void IAutocompleteOptionProvider.GetParemeterAutocompleteOptions(string[] words, int wordIndex, IList<string> optionList)
+        void IAutocompleteOptionProvider.GetParameterAutocompleteOptions(string[] words, int wordIndex, IList<string> optionList)
         {
             EnsureInitialized();
 
             if (wordIndex == 0)
             {
-                foreach (var commandName in RegisteredMethods.Keys.ToArray())
+                foreach (var commandName in RegisteredMethods.Keys)
                 {
                     if (optionList.Contains(commandName))
                     {
@@ -277,15 +277,16 @@ namespace BroWar.Debugging.Console
             }
             else
             {
-                if (!namesToInstances.ContainsKey(words[0]))
+                string commandFromInput = words[0];
+                if (!namesToInstances.ContainsKey(commandFromInput))
                 {
                     return;
                 }
 
-                var command = namesToInstances[words[0]];
+                var command = namesToInstances[commandFromInput];
                 if (command is IAutocompleteOptionProvider commandAutocompleteProvider)
                 {
-                    commandAutocompleteProvider.GetParemeterAutocompleteOptions(words, wordIndex, optionList);
+                    commandAutocompleteProvider.GetParameterAutocompleteOptions(words, wordIndex, optionList);
                 }
             }
         }

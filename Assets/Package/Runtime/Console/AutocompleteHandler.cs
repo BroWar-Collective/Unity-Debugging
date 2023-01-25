@@ -10,16 +10,13 @@ namespace BroWar.Debugging.Console
         {
             string bestMatch = string.Empty;
             word = word.ToLower();
-
             foreach (var option in optionList)
             {
-                if (option.ToLower().StartsWith(word)
-                   && !option.Equals(word))
+                var optionFormatted = option.ToLower();
+                if (optionFormatted.StartsWith(word) && !optionFormatted.Equals(word)
+                    && (string.IsNullOrEmpty(bestMatch) || optionFormatted.Length < bestMatch.Length))
                 {
-                    if (string.IsNullOrEmpty(bestMatch) || option.Length < bestMatch.Length)
-                    {
-                        bestMatch = option;
-                    }
+                    bestMatch = option;
                 }
             }
 
@@ -30,11 +27,11 @@ namespace BroWar.Debugging.Console
         {
             string bestMatch = string.Empty;
             word = word.ToLower();
-
             foreach (var option in optionList)
             {
-                if (option.ToLower().Contains(word)
-                   && !option.Equals(word))
+                var optionFormatted = option.ToLower();
+                if (optionFormatted.Contains(word) && !optionFormatted.Equals(word)
+                    && (string.IsNullOrEmpty(bestMatch) || optionFormatted.Length < bestMatch.Length))
                 {
                     bestMatch = option;
                 }
@@ -46,8 +43,7 @@ namespace BroWar.Debugging.Console
         public void RefreshOptions(IAutocompleteOptionProvider optionProvider, string[] words, int wordIndex)
         {
             optionList.Clear();
-
-            optionProvider.GetParemeterAutocompleteOptions(words, wordIndex, optionList);
+            optionProvider.GetParameterAutocompleteOptions(words, wordIndex, optionList);
         }
 
         public string GetBestMatch(string word)
@@ -58,14 +54,12 @@ namespace BroWar.Debugging.Console
             }
 
             string bestMatch = GetShortestValidMatchStarting(word);
-
             if (!string.IsNullOrEmpty(bestMatch))
             {
                 return bestMatch;
             }
 
             bestMatch = GetShortestValidMatchContaining(word);
-
             if (!string.IsNullOrEmpty(bestMatch))
             {
                 return bestMatch;

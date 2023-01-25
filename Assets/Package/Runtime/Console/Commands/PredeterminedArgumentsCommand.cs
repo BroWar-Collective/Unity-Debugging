@@ -11,7 +11,7 @@ namespace BroWar.Debugging.Console.Commands
 
         }
 
-        void IAutocompleteOptionProvider.GetParemeterAutocompleteOptions(string[] words, int wordIndex, IList<string> optionList)
+        void IAutocompleteOptionProvider.GetParameterAutocompleteOptions(string[] words, int wordIndex, IList<string> optionList)
         {
             switch (wordIndex)
             {
