@@ -249,9 +249,10 @@ namespace BroWar.Debugging.Console
                 return;
             }
 
-            if (currentInput.Contains(' '))
+            string trimmedInput = currentInput.Trim();
+            if (trimmedInput.Contains(' '))
             {
-                currentInput = currentInput.Trim().Substring(0, currentInput.LastIndexOf(' '));
+                currentInput = trimmedInput.Substring(0, trimmedInput.LastIndexOf(' '));
                 currentInput = $"{currentInput} {currentAutocompleteMatch}";
             }
             else
