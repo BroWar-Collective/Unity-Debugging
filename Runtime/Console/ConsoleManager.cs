@@ -274,20 +274,19 @@ namespace BroWar.Debugging.Console
 
                     optionList.Add(commandName);
                 }
+                return;
             }
-            else
-            {
-                string commandFromInput = words[0];
-                if (!namesToInstances.ContainsKey(commandFromInput))
-                {
-                    return;
-                }
 
-                var command = namesToInstances[commandFromInput];
-                if (command is IAutocompleteOptionProvider commandAutocompleteProvider)
-                {
-                    commandAutocompleteProvider.GetParameterAutocompleteOptions(words, wordIndex, optionList);
-                }
+            var commandFromInput = words[0];
+            if (!namesToInstances.ContainsKey(commandFromInput))
+            {
+                return;
+            }
+
+            var command = namesToInstances[commandFromInput];
+            if (command is IAutocompleteOptionProvider commandAutocompleteProvider)
+            {
+                commandAutocompleteProvider.GetParameterAutocompleteOptions(words, wordIndex, optionList);
             }
         }
 
@@ -300,6 +299,7 @@ namespace BroWar.Debugging.Console
             }
         }
 
+        internal ConsoleManagerSettings Settings => settings;
         public IReadOnlyDictionary<string, HashSet<MethodInfo>> RegisteredMethods => namesToMethods;
     }
 }

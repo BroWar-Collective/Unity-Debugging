@@ -53,7 +53,7 @@ namespace BroWar.Debugging.Console
 
         private Dictionary<Key, Action> inputKeysToActions;
 
-        private AutocompleteHandler autocompleteHandler;
+        private readonly AutocompleteHandler autocompleteHandler = new AutocompleteHandler();
 
         private void Update()
         {
@@ -109,11 +109,11 @@ namespace BroWar.Debugging.Console
             using (new GUILayout.HorizontalScope())
             {
                 GUI.SetNextControlName(inputFieldControlName);
-                string previousInput = currentInput;
+                var previousInput = currentInput;
                 currentInput = GUILayout.TextField(currentInput, Style.consoleTextStyle);
                 if (previousInput != currentInput)
                 {
-                    InputChanged();
+                    OnInputChange();
                 }
 
                 if (forceInputFocus)
@@ -166,28 +166,14 @@ namespace BroWar.Debugging.Console
                 { inputSettings.AutocompleteKey, PerformAutocomplete }
             };
 
-            autocompleteHandler = new AutocompleteHandler();
             windowRect = styleSettings.InitialRect;
             scrollPosition = Vector2.zero;
             isInitialized = true;
         }
 
-        private void InputChanged()
+        private void OnInputChange()
         {
-            UpdateAutocomplete();
-        }
-
-        private void UpdateAutocomplete()
-        {
-            if (string.IsNullOrEmpty(currentInput))
-            {
-                currentAutocompleteMatch = string.Empty;
-                return;
-            }
-
-            var splitInput = currentInput.Split(' ');
-            autocompleteHandler.RefreshOptions(consoleManager, splitInput, splitInput.Length - 1);
-            currentAutocompleteMatch = autocompleteHandler.GetBestMatch(splitInput.Last());
+            currentAutocompleteMatch = autocompleteHandler.GetBestMatch(consoleManager, currentInput, consoleManager.Settings.MultiargumentEncapsulationCharacter);
         }
 
         private void InvokeInputString()
