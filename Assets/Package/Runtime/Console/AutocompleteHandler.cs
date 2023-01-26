@@ -1,66 +1,67 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace BroWar.Debugging.Console
 {
     public class AutocompleteHandler
     {
-        private IList<string> optionList = new List<string>();
+        private IList<string> options = new List<string>();
 
-        private string GetShortestValidMatchStarting(string word)
+        private bool TryGetShortestValidMatchStarting(string word, out string bestMatch)
         {
-            string bestMatch = string.Empty;
-            word = word.ToLower();
-            foreach (var option in optionList)
+            bestMatch = string.Empty;
+            var wordFormatted = word.ToLower();
+            foreach (var option in options)
             {
                 var optionFormatted = option.ToLower();
-                if (optionFormatted.StartsWith(word) && !optionFormatted.Equals(word)
+                if (optionFormatted.StartsWith(wordFormatted) && !optionFormatted.Equals(wordFormatted)
                     && (string.IsNullOrEmpty(bestMatch) || optionFormatted.Length < bestMatch.Length))
                 {
                     bestMatch = option;
                 }
             }
 
-            return bestMatch;
+            return !string.IsNullOrEmpty(bestMatch);
         }
 
-        private string GetShortestValidMatchContaining(string word)
+        private bool TryGetShortestValidMatchContaining(string word, out string bestMatch)
         {
-            string bestMatch = string.Empty;
-            word = word.ToLower();
-            foreach (var option in optionList)
+            bestMatch = string.Empty;
+            var wordFormatted = word.ToLower();
+            foreach (var option in options)
             {
                 var optionFormatted = option.ToLower();
-                if (optionFormatted.Contains(word) && !optionFormatted.Equals(word)
+                if (optionFormatted.Contains(wordFormatted) && !optionFormatted.Equals(wordFormatted)
                     && (string.IsNullOrEmpty(bestMatch) || optionFormatted.Length < bestMatch.Length))
                 {
                     bestMatch = option;
                 }
             }
 
-            return bestMatch;
+            return !string.IsNullOrEmpty(bestMatch);
         }
 
-        public void RefreshOptions(IAutocompleteOptionProvider optionProvider, string[] words, int wordIndex)
+        private void RefreshOptions(IAutocompleteOptionProvider optionProvider, string[] splitInput)
         {
-            optionList.Clear();
-            optionProvider.GetParameterAutocompleteOptions(words, wordIndex, optionList);
+            options.Clear();
+            optionProvider.GetParameterAutocompleteOptions(splitInput, splitInput.Length - 1, options);
         }
 
-        public string GetBestMatch(string word)
+        public string GetBestMatch(IAutocompleteOptionProvider optionProvider, string input, string encapsulationCharacter)
         {
-            if (string.IsNullOrEmpty(word))
+            if (string.IsNullOrEmpty(input))
             {
                 return string.Empty;
             }
 
-            string bestMatch = GetShortestValidMatchStarting(word);
-            if (!string.IsNullOrEmpty(bestMatch))
+            var splitInput = ConsoleUtility.SplitInput(input, encapsulationCharacter);
+            RefreshOptions(optionProvider, splitInput);
+            if (TryGetShortestValidMatchStarting(splitInput.Last(), out var bestMatch))
             {
                 return bestMatch;
             }
 
-            bestMatch = GetShortestValidMatchContaining(word);
-            if (!string.IsNullOrEmpty(bestMatch))
+            if (TryGetShortestValidMatchContaining(splitInput.Last(), out bestMatch))
             {
                 return bestMatch;
             }

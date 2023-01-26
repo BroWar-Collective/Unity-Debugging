@@ -10,5 +10,5 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4ddb93007c21aa749860a8429d300b4d, type: 3}
-  m_Name: Predetermined Arguments Command
+  m_Name: Multiple Arguments Command
   m_EditorClassIdentifier: 

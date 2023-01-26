@@ -27,6 +27,14 @@ namespace BroWar.Debugging.Console
             }
         }
 
+        public static string[] SplitInput(string input, string encapsulationCharacter)
+        {
+            var words = new List<string>();
+            words.Add(Regex.Match(input, @"^([\w\-]+)").Value); //gets first word from input
+            words.AddRange(ExtractArguments(input, encapsulationCharacter));
+            return words.ToArray();
+        }
+
         public static string[] ExtractArguments(string input, string encapsulationCharacter)
         {
             var encapsulatingCharactersCount = Regex.Matches(input, encapsulationCharacter).Count;
