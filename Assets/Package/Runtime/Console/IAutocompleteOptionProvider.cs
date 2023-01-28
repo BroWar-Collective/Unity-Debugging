@@ -4,6 +4,6 @@ namespace BroWar.Debugging.Console
 {
     public interface IAutocompleteOptionProvider
     {
-        void GetParameterAutocompleteOptions(string[] words, int wordIndex, IList<string> optionList);
+        void GetParameterAutocompleteOptions(string[] words, int wordIndex, IList<string> options);
     }
 }

@@ -1,25 +1,27 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace BroWar.Debugging.Console.Commands
+namespace BroWar.Debugging.Examples.Commands
 {
+    using BroWar.Debugging.Console;
+
     [CreateAssetMenu(fileName = "Multiple Arguments Command", menuName = "BroWar/Debugging/Commands/Multiple Arguments")]
     public class MultipleArgumentsCommand : ConsoleCommand, IAutocompleteOptionProvider
     {
         public void ModifyArray(string arg1, string arg2)
         { }
 
-        void IAutocompleteOptionProvider.GetParameterAutocompleteOptions(string[] words, int wordIndex, IList<string> optionList)
+        void IAutocompleteOptionProvider.GetParameterAutocompleteOptions(string[] words, int wordIndex, IList<string> options)
         {
             switch (wordIndex)
             {
                 case 1:
-                    optionList.Add("insert");
-                    optionList.Add("remove");
+                    options.Add("insert");
+                    options.Add("remove");
                     break;
                 case 2:
-                    optionList.Add("item");
-                    optionList.Add("range");
+                    options.Add("item");
+                    options.Add("range");
                     break;
             }
         }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -173,7 +174,8 @@ namespace BroWar.Debugging.Console
 
         private void OnInputChange()
         {
-            currentAutocompleteMatch = autocompleteHandler.GetBestMatch(consoleManager, currentInput, consoleManager.Settings.MultiargumentEncapsulationCharacter);
+            var encapsulationCharacter = consoleManager.Settings.MultiargumentEncapsulationCharacter;
+            currentAutocompleteMatch = autocompleteHandler.GetBestMatch(consoleManager, currentInput, encapsulationCharacter);
         }
 
         private void InvokeInputString()
@@ -249,16 +251,10 @@ namespace BroWar.Debugging.Console
                 return;
             }
 
-            string trimmedInput = currentInput.Trim();
-            if (trimmedInput.Contains(' '))
-            {
-                currentInput = trimmedInput.Substring(0, trimmedInput.LastIndexOf(' '));
-                currentInput = $"{currentInput} {currentAutocompleteMatch}";
-            }
-            else
-            {
-                currentInput = currentAutocompleteMatch;
-            }
+            Match match = Regex.Match(currentInput.Trim(), @"^(.*)\s[^\s]+$");
+            currentInput = match.Success
+            ? $"{ match.Groups[1].Value} { currentAutocompleteMatch}"
+            : currentAutocompleteMatch;
 
             updateCursorPosition = true;
         }
