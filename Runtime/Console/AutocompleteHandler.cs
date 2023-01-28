@@ -5,7 +5,7 @@ namespace BroWar.Debugging.Console
 {
     public class AutocompleteHandler
     {
-        private IList<string> options = new List<string>();
+        private readonly IList<string> options = new List<string>();
 
         private bool TryGetShortestValidMatchStarting(string word, out string bestMatch)
         {
