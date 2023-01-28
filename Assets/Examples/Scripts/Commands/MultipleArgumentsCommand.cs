@@ -5,7 +5,7 @@ namespace BroWar.Debugging.Examples.Commands
 {
     using BroWar.Debugging.Console;
 
-    [CreateAssetMenu(fileName = "Multiple Arguments Command", menuName = "BroWar/Debugging/Commands/Multiple Arguments")]
+    [CreateAssetMenu(fileName = "Multiple Arguments Command", menuName = "Examples/Commands/Multiple Arguments")]
     public class MultipleArgumentsCommand : ConsoleCommand, IAutocompleteOptionProvider
     {
         public void ModifyArray(string arg1, string arg2)
