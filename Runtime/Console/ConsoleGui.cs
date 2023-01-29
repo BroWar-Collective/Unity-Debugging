@@ -110,12 +110,13 @@ namespace BroWar.Debugging.Console
             using (new GUILayout.HorizontalScope())
             {
                 GUI.SetNextControlName(inputFieldControlName);
-                var previousInput = currentInput;
-                currentInput = GUILayout.TextField(currentInput, Style.consoleTextStyle);
-                if (previousInput != currentInput)
+                var previousInput = CurrentInput;
+                currentInput = GUILayout.TextField(CurrentInput, Style.consoleTextStyle);
+                if (previousInput != CurrentInput)
                 {
                     OnInputChange();
                 }
+                previousInput = CurrentInput;
 
                 if (forceInputFocus)
                 {
@@ -127,7 +128,7 @@ namespace BroWar.Debugging.Console
                     GUI.FocusControl(inputFieldControlName);
                     var editor = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
                     editor.OnFocus();
-                    editor.cursorIndex = currentInput.Length;
+                    editor.cursorIndex = CurrentInput.Length;
                     updateCursorPosition = false;
                 }
 
@@ -143,7 +144,7 @@ namespace BroWar.Debugging.Console
             {
                 if (!string.IsNullOrEmpty(currentAutocompleteMatch))
                 {
-                    GUILayout.Label($"{currentAutocompleteMatch} (Press {inputSettings.AutocompleteKey} to apply)");
+                    GUILayout.Label($"{currentAutocompleteMatch} <color=yellow>(Press {inputSettings.AutocompleteKey} to apply)</color>");
                 }
             }
 
@@ -157,7 +158,7 @@ namespace BroWar.Debugging.Console
                 return;
             }
 
-            currentInput = string.Empty;
+            CurrentInput = string.Empty;
             printedTextBuilder = new StringBuilder();
             inputKeysToActions = new Dictionary<Key, Action>()
             {
@@ -175,18 +176,18 @@ namespace BroWar.Debugging.Console
         private void OnInputChange()
         {
             var encapsulationCharacter = consoleManager.Settings.MultiargumentEncapsulationCharacter;
-            currentAutocompleteMatch = autocompleteHandler.GetBestMatch(consoleManager, currentInput, encapsulationCharacter);
+            currentAutocompleteMatch = autocompleteHandler.GetBestMatch(consoleManager, CurrentInput, encapsulationCharacter);
         }
 
         private void InvokeInputString()
         {
-            if (string.IsNullOrEmpty(currentInput))
+            if (string.IsNullOrEmpty(CurrentInput))
             {
                 return;
             }
 
-            printedTextBuilder.AppendLine(currentInput);
-            var resultObject = consoleManager.InvokeCommand(currentInput);
+            printedTextBuilder.AppendLine(CurrentInput);
+            var resultObject = consoleManager.InvokeCommand(CurrentInput);
             var stringResult = ParseResultToString(resultObject);
             if (!string.IsNullOrEmpty(stringResult))
             {
@@ -195,7 +196,8 @@ namespace BroWar.Debugging.Console
 
             printedText = printedTextBuilder.ToString();
             printedText = printedText.TrimEnd();
-            currentInput = string.Empty;
+            CurrentInput = string.Empty;
+            currentAutocompleteMatch = string.Empty;
             MoveScrollToBottom();
         }
 
@@ -230,7 +232,7 @@ namespace BroWar.Debugging.Console
         {
             if (consoleManager.TryGetNextEntryFromHistory(out var entry))
             {
-                currentInput = entry;
+                CurrentInput = entry;
                 updateCursorPosition = true;
             }
         }
@@ -239,7 +241,7 @@ namespace BroWar.Debugging.Console
         {
             if (consoleManager.TryGetPrevEntryFromHistory(out var entry))
             {
-                currentInput = entry;
+                CurrentInput = entry;
                 updateCursorPosition = true;
             }
         }
@@ -251,10 +253,10 @@ namespace BroWar.Debugging.Console
                 return;
             }
 
-            Match match = Regex.Match(currentInput.Trim(), @"^(.*)\s[^\s]+$");
-            currentInput = match.Success
-            ? $"{ match.Groups[1].Value} { currentAutocompleteMatch}"
-            : currentAutocompleteMatch;
+            var match = Regex.Match(CurrentInput.Trim(), @"^(.*)\s[^\s]+$");
+            CurrentInput = match.Success
+                ? $"{ match.Groups[1].Value} {currentAutocompleteMatch}"
+                : currentAutocompleteMatch;
 
             updateCursorPosition = true;
         }
@@ -274,8 +276,8 @@ namespace BroWar.Debugging.Console
 
             var inputString = Keyboard.current[triggerKey].displayName;
             var inputStringLength = inputString.Length;
-            var currentInputLength = currentInput.Length;
-            currentInput = currentInput.Substring(0, currentInputLength - inputStringLength);
+            var currentInputLength = CurrentInput.Length;
+            CurrentInput = CurrentInput.Substring(0, currentInputLength - inputStringLength);
         }
 
         private Vector2 GetRequiredWindowSize()
@@ -349,6 +351,16 @@ namespace BroWar.Debugging.Console
         {
             printedTextBuilder?.Clear();
             printedText = string.Empty;
+        }
+
+        private string CurrentInput
+        {
+            get => currentInput;
+            set
+            {
+                currentInput = value;
+                OnInputChange();
+            }
         }
 
         public bool IsShown { get; private set; }
