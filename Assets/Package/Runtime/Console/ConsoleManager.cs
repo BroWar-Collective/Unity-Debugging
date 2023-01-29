@@ -211,7 +211,7 @@ namespace BroWar.Debugging.Console
                 var commandName = ExtractCommandName(input);
                 if (namesToMethods.TryGetValue(commandName, out var commandMethods))
                 {
-                    var arguments = ConsoleUtility.ExtractArguments(input, settings.MultiargumentEncapsulationCharacter);
+                    ConsoleUtility.TryExtractArguments(input, settings.MultiargumentEncapsulationCharacter, out var arguments);
                     if (TryMatchMethod(commandName, arguments, commandMethods, out var method, out var parsedArguments))
                     {
                         var command = namesToInstances[commandName];

@@ -30,17 +30,21 @@ namespace BroWar.Debugging.Console
         public static string[] SplitInput(string input, string encapsulationCharacter)
         {
             var words = new List<string>();
-            words.Add(Regex.Match(input, @"^([\w\-]+)").Value); //gets first word from input
-            words.AddRange(ExtractArguments(input, encapsulationCharacter));
+            var commandName = Regex.Match(input, @"^([\w\-]+)").Value;
+            TryExtractArguments(input, encapsulationCharacter, out var arguments);
+            words.Add(commandName);
+            words.AddRange(arguments);
             return words.ToArray();
         }
 
-        public static string[] ExtractArguments(string input, string encapsulationCharacter)
+        public static bool TryExtractArguments(string input, string encapsulationCharacter, out string[] arguments)
         {
             var encapsulatingCharactersCount = Regex.Matches(input, encapsulationCharacter).Count;
+
             if (encapsulatingCharactersCount % 2 != 0)
             {
-                throw new ArgumentExtractionException("Missing closing encapsulation character in input");
+                arguments = new string[0];
+                return false;
             }
 
             var argumentsList = new List<string>();
@@ -60,7 +64,8 @@ namespace BroWar.Debugging.Console
                 }
             }
 
-            return argumentsList.ToArray();
+            arguments = argumentsList.ToArray();
+            return true;
         }
 
         public static string GetMethodDefinitionString(MethodInfo method)
