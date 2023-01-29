@@ -31,9 +31,11 @@ namespace BroWar.Debugging.Console
         {
             var words = new List<string>();
             var commandName = Regex.Match(input, @"^([\w\-]+)").Value;
-            TryExtractArguments(input, encapsulationCharacter, out var arguments);
             words.Add(commandName);
-            words.AddRange(arguments);
+            if (TryExtractArguments(input, encapsulationCharacter, out var arguments))
+            {
+                words.AddRange(arguments);
+            }
             return words.ToArray();
         }
 
@@ -43,7 +45,7 @@ namespace BroWar.Debugging.Console
 
             if (encapsulatingCharactersCount % 2 != 0)
             {
-                arguments = new string[0];
+                arguments = Array.Empty<string>();
                 return false;
             }
 
