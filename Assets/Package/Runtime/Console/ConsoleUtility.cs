@@ -36,6 +36,7 @@ namespace BroWar.Debugging.Console
             {
                 words.AddRange(arguments);
             }
+
             return words.ToArray();
         }
 
