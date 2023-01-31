@@ -110,14 +110,7 @@ namespace BroWar.Debugging.Console
             using (new GUILayout.HorizontalScope())
             {
                 GUI.SetNextControlName(inputFieldControlName);
-                var previousInput = CurrentInput;
-                currentInput = GUILayout.TextField(CurrentInput, Style.consoleTextStyle);
-                if (previousInput != CurrentInput)
-                {
-                    OnInputChange();
-                }
-                previousInput = CurrentInput;
-
+                CurrentInput = GUILayout.TextField(CurrentInput, Style.consoleTextStyle);
                 if (forceInputFocus)
                 {
                     GUI.FocusControl(inputFieldControlName);
@@ -255,7 +248,7 @@ namespace BroWar.Debugging.Console
 
             var match = Regex.Match(CurrentInput.Trim(), @"^(.*)\s[^\s]+$");
             CurrentInput = match.Success
-                ? $"{ match.Groups[1].Value} {currentAutocompleteMatch}"
+                ? $"{match.Groups[1].Value} {currentAutocompleteMatch}"
                 : currentAutocompleteMatch;
 
             updateCursorPosition = true;
@@ -358,6 +351,11 @@ namespace BroWar.Debugging.Console
             get => currentInput;
             set
             {
+                if (currentInput == value)
+                {
+                    return;
+                }
+
                 currentInput = value;
                 OnInputChange();
             }

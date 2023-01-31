@@ -213,8 +213,9 @@ namespace BroWar.Debugging.Console
                 {
                     if (!ConsoleUtility.TryExtractArguments(input, settings.MultiargumentEncapsulationCharacter, out var arguments))
                     {
-                        return new CommandResult($"Argument extractioon failed. Are you missing a closing encapsulation character?", MessageType.Error);
+                        return new CommandResult($"Argument extraction failed. Are you missing a closing encapsulation character?", MessageType.Error);
                     }
+
                     if (TryMatchMethod(commandName, arguments, commandMethods, out var method, out var parsedArguments))
                     {
                         var command = namesToInstances[commandName];
