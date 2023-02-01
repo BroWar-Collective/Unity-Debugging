@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -44,12 +46,15 @@ namespace BroWar.Debugging.Console
 
         private string printedText;
         private string currentInput;
+        private string currentAutocompleteMatch;
         private StringBuilder printedTextBuilder;
 
         private bool updateCursorPosition;
         private bool isInitialized;
 
         private Dictionary<Key, Action> inputKeysToActions;
+
+        private readonly AutocompleteHandler autocompleteHandler = new AutocompleteHandler();
 
         private void Update()
         {
@@ -105,7 +110,7 @@ namespace BroWar.Debugging.Console
             using (new GUILayout.HorizontalScope())
             {
                 GUI.SetNextControlName(inputFieldControlName);
-                currentInput = GUILayout.TextField(currentInput, Style.consoleTextStyle);
+                CurrentInput = GUILayout.TextField(CurrentInput, Style.consoleTextStyle);
                 if (forceInputFocus)
                 {
                     GUI.FocusControl(inputFieldControlName);
@@ -116,7 +121,7 @@ namespace BroWar.Debugging.Console
                     GUI.FocusControl(inputFieldControlName);
                     var editor = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
                     editor.OnFocus();
-                    editor.cursorIndex = currentInput.Length;
+                    editor.cursorIndex = CurrentInput.Length;
                     updateCursorPosition = false;
                 }
 
@@ -125,6 +130,14 @@ namespace BroWar.Debugging.Console
                 if (GUILayout.Button(buttonContent, GUILayout.Width(size.x)))
                 {
                     InvokeInputString();
+                }
+            }
+
+            using (new GUILayout.HorizontalScope())
+            {
+                if (!string.IsNullOrEmpty(currentAutocompleteMatch))
+                {
+                    GUILayout.Label($"{currentAutocompleteMatch} <color=yellow>(Press {inputSettings.AutocompleteKey} to apply)</color>");
                 }
             }
 
@@ -138,13 +151,14 @@ namespace BroWar.Debugging.Console
                 return;
             }
 
-            currentInput = string.Empty;
+            CurrentInput = string.Empty;
             printedTextBuilder = new StringBuilder();
             inputKeysToActions = new Dictionary<Key, Action>()
             {
                 { inputSettings.ConfirmationKey, InvokeInputString },
                 { inputSettings.NextCommandKey, FetchNextCommand },
-                { inputSettings.PrevCommandKey, FetchPrevCommand }
+                { inputSettings.PrevCommandKey, FetchPrevCommand },
+                { inputSettings.AutocompleteKey, PerformAutocomplete }
             };
 
             windowRect = styleSettings.InitialRect;
@@ -152,15 +166,21 @@ namespace BroWar.Debugging.Console
             isInitialized = true;
         }
 
+        private void OnInputChange()
+        {
+            var encapsulationCharacter = consoleManager.Settings.MultiargumentEncapsulationCharacter;
+            currentAutocompleteMatch = autocompleteHandler.GetBestMatch(consoleManager, CurrentInput, encapsulationCharacter);
+        }
+
         private void InvokeInputString()
         {
-            if (string.IsNullOrEmpty(currentInput))
+            if (string.IsNullOrEmpty(CurrentInput))
             {
                 return;
             }
 
-            printedTextBuilder.AppendLine(currentInput);
-            var resultObject = consoleManager.InvokeCommand(currentInput);
+            printedTextBuilder.AppendLine(CurrentInput);
+            var resultObject = consoleManager.InvokeCommand(CurrentInput);
             var stringResult = ParseResultToString(resultObject);
             if (!string.IsNullOrEmpty(stringResult))
             {
@@ -169,7 +189,9 @@ namespace BroWar.Debugging.Console
 
             printedText = printedTextBuilder.ToString();
             printedText = printedText.TrimEnd();
-            currentInput = string.Empty;
+            CurrentInput = string.Empty;
+            currentAutocompleteMatch = string.Empty;
+            MoveScrollToBottom();
         }
 
         private string ParseResultToString(object resultObject)
@@ -203,7 +225,7 @@ namespace BroWar.Debugging.Console
         {
             if (consoleManager.TryGetNextEntryFromHistory(out var entry))
             {
-                currentInput = entry;
+                CurrentInput = entry;
                 updateCursorPosition = true;
             }
         }
@@ -212,9 +234,24 @@ namespace BroWar.Debugging.Console
         {
             if (consoleManager.TryGetPrevEntryFromHistory(out var entry))
             {
-                currentInput = entry;
+                CurrentInput = entry;
                 updateCursorPosition = true;
             }
+        }
+
+        private void PerformAutocomplete()
+        {
+            if (string.IsNullOrEmpty(currentAutocompleteMatch))
+            {
+                return;
+            }
+
+            var match = Regex.Match(CurrentInput.Trim(), @"^(.*)\s[^\s]+$");
+            CurrentInput = match.Success
+                ? $"{match.Groups[1].Value} {currentAutocompleteMatch}"
+                : currentAutocompleteMatch;
+
+            updateCursorPosition = true;
         }
 
         private bool IsKeyPressed(Key key)
@@ -232,8 +269,8 @@ namespace BroWar.Debugging.Console
 
             var inputString = Keyboard.current[triggerKey].displayName;
             var inputStringLength = inputString.Length;
-            var currentInputLength = currentInput.Length;
-            currentInput = currentInput.Substring(0, currentInputLength - inputStringLength);
+            var currentInputLength = CurrentInput.Length;
+            CurrentInput = CurrentInput.Substring(0, currentInputLength - inputStringLength);
         }
 
         private Vector2 GetRequiredWindowSize()
@@ -272,6 +309,11 @@ namespace BroWar.Debugging.Console
             return windowPosition;
         }
 
+        private void MoveScrollToBottom()
+        {
+            scrollPosition.y = float.MaxValue;
+        }
+
         public void Toggle()
         {
             if (IsShown)
@@ -302,6 +344,21 @@ namespace BroWar.Debugging.Console
         {
             printedTextBuilder?.Clear();
             printedText = string.Empty;
+        }
+
+        private string CurrentInput
+        {
+            get => currentInput;
+            set
+            {
+                if (currentInput == value)
+                {
+                    return;
+                }
+
+                currentInput = value;
+                OnInputChange();
+            }
         }
 
         public bool IsShown { get; private set; }
