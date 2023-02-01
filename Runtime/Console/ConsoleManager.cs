@@ -83,10 +83,11 @@ namespace BroWar.Debugging.Console
 
         private bool TryParseParameters(string[] arguments, ParameterInfo[] methodParameters, out object[] parsedArguments)
         {
-            parsedArguments = new object[arguments.Length];
+            var count = arguments.Length;
+            parsedArguments = new object[count];
             try
             {
-                for (var i = 0; i < arguments.Length; i++)
+                for (var i = 0; i < count; i++)
                 {
                     var converter = TypeDescriptor.GetConverter(methodParameters[i].ParameterType);
                     parsedArguments[i] = converter.ConvertFromInvariantString(arguments[i]);
