@@ -1,11 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
+using NUnit.Framework;
 
 namespace BroWar.Debugging.Tests
 {
     using BroWar.Debugging.Console;
-    using NUnit.Framework;
 
     public class AutocompleteTest
     {
@@ -28,15 +26,14 @@ namespace BroWar.Debugging.Tests
             }
         }
 
-        private OptionProvider optionProvider = new OptionProvider();
-        private AutocompleteHandler autocompleteHandler = new AutocompleteHandler();
+        private readonly AutocompleteHandler autocompleteHandler = new AutocompleteHandler();
 
         [TestCase("comm", "commandName")]
         [TestCase("commandName arg", "argument1")]
         [TestCase("commandName argument1, a", "argument2")]
         public void TestAvailableAutocompletion(string input, string expectedCompleted)
         {
-            var autocompletedInput = autocompleteHandler.GetBestMatch(optionProvider, input, "\"");
+            var autocompletedInput = autocompleteHandler.GetBestMatch(new OptionProvider(), input, "\"");
             Assert.AreEqual(autocompletedInput, expectedCompleted);
         }
 
@@ -44,7 +41,7 @@ namespace BroWar.Debugging.Tests
         [TestCase("missingCom")]
         public void TestUnavailableAutocompletion(string input)
         {
-            var autocompletedInput = autocompleteHandler.GetBestMatch(optionProvider, input, "\"");
+            var autocompletedInput = autocompleteHandler.GetBestMatch(new OptionProvider(), input, "\"");
             Assert.AreEqual(autocompletedInput, string.Empty);
         }
     }
