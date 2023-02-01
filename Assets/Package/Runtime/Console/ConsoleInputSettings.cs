@@ -15,10 +15,13 @@ namespace BroWar.Debugging.Console
         private Key prevCommandKey = Key.UpArrow;
         [SerializeField]
         private Key nextCommandKey = Key.DownArrow;
+        [SerializeField]
+        private Key autocompleteKey = Key.Tab;
 
         public Key TriggerKey { get => triggerKey; set => triggerKey = value; }
         public Key ConfirmationKey { get => confirmationKey; set => confirmationKey = value; }
         public Key PrevCommandKey { get => prevCommandKey; set => prevCommandKey = value; }
         public Key NextCommandKey { get => nextCommandKey; set => nextCommandKey = value; }
+        public Key AutocompleteKey { get => autocompleteKey; set => autocompleteKey = value; }
     }
 }

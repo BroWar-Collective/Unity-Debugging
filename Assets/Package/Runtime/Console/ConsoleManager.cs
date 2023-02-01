@@ -14,8 +14,8 @@ namespace BroWar.Debugging.Console
     /// Manager for registering/unregistering and invoking console commands and storing input history.
     /// Uses commands stored in <see cref="commandsRepository"/> as an initial commands set.
     /// </summary>
-    [AddComponentMenu("LowPolis/Debugging/Console/Console Manager")]
-    public class ConsoleManager : MonoBehaviour, IConsoleManager
+    [AddComponentMenu("BroWar/Debugging/Console/Console Manager")]
+    public class ConsoleManager : MonoBehaviour, IConsoleManager, IAutocompleteOptionProvider
     {
         [Title("Settings")]
         [SerializeField, FormerlySerializedAs("consoleManagerSettings"), IgnoreParent]
@@ -27,19 +27,23 @@ namespace BroWar.Debugging.Console
         private ConsoleHistory inputHistory;
 
         private bool isInitialized;
+        private bool isInitializing;
 
         private void EnsureInitialized()
         {
-            if (isInitialized)
+            if (isInitialized || isInitializing)
             {
                 return;
             }
 
-            isInitialized = true;
-            InitializeCache();
+            isInitializing = true;
+
             ValidateSettings();
             InitializeHistory();
             InitializeCommands();
+
+            isInitialized = true;
+            isInitializing = false;
         }
 
         private void ValidateSettings()
@@ -63,6 +67,8 @@ namespace BroWar.Debugging.Console
 
         private void InitializeCommands()
         {
+            InitializeCache();
+
             var commandsRepository = settings.CommandsRepository;
             var commandsList = commandsRepository.commands;
             for (int i = 0; i < commandsList.Count; i++)
@@ -83,10 +89,11 @@ namespace BroWar.Debugging.Console
 
         private bool TryParseParameters(string[] arguments, ParameterInfo[] methodParameters, out object[] parsedArguments)
         {
-            parsedArguments = new object[arguments.Length];
+            var count = arguments.Length;
+            parsedArguments = new object[count];
             try
             {
-                for (var i = 0; i < arguments.Length; i++)
+                for (var i = 0; i < count; i++)
                 {
                     var converter = TypeDescriptor.GetConverter(methodParameters[i].ParameterType);
                     parsedArguments[i] = converter.ConvertFromInvariantString(arguments[i]);
@@ -145,7 +152,7 @@ namespace BroWar.Debugging.Console
             return false;
         }
 
-        private void RegistorMethodFromCommand(ConsoleCommand command, MethodInfo method)
+        private void RegisterMethodFromCommand(ConsoleCommand command, MethodInfo method)
         {
             var commandName = method.Name.ToLower();
             if (namesToMethods.TryGetValue(commandName, out var methodsGroup))
@@ -177,7 +184,7 @@ namespace BroWar.Debugging.Console
             var commandInfo = commandType.GetTypeInfo();
             foreach (var method in commandInfo.DeclaredMethods.Where(method => method.IsPublic))
             {
-                RegistorMethodFromCommand(command, method);
+                RegisterMethodFromCommand(command, method);
             }
         }
 
@@ -211,7 +218,11 @@ namespace BroWar.Debugging.Console
                 var commandName = ExtractCommandName(input);
                 if (namesToMethods.TryGetValue(commandName, out var commandMethods))
                 {
-                    var arguments = ConsoleUtility.ExtractArguments(input, settings.MultiargumentEncapsulationCharacter);
+                    if (!ConsoleUtility.TryExtractArguments(input, settings.MultiargumentEncapsulationCharacter, out var arguments))
+                    {
+                        return new CommandResult($"Argument extraction failed. Are you missing a closing encapsulation character?", MessageType.Error);
+                    }
+
                     if (TryMatchMethod(commandName, arguments, commandMethods, out var method, out var parsedArguments))
                     {
                         var command = namesToInstances[commandName];
@@ -259,6 +270,37 @@ namespace BroWar.Debugging.Console
             InputHistory.LoadHistory();
         }
 
+        void IAutocompleteOptionProvider.GetParameterAutocompleteOptions(string[] words, int wordIndex, IList<string> options)
+        {
+            EnsureInitialized();
+
+            if (wordIndex == 0)
+            {
+                foreach (var commandName in RegisteredMethods.Keys)
+                {
+                    if (options.Contains(commandName))
+                    {
+                        continue;
+                    }
+
+                    options.Add(commandName);
+                }
+
+                return;
+            }
+
+            var commandFromInput = words[0];
+            if (!namesToInstances.TryGetValue(commandFromInput, out ConsoleCommand command))
+            {
+                return;
+            }
+
+            if (command is IAutocompleteOptionProvider commandAutocompleteProvider)
+            {
+                commandAutocompleteProvider.GetParameterAutocompleteOptions(words, wordIndex, options);
+            }
+        }
+
         private ConsoleHistory InputHistory
         {
             get
@@ -268,6 +310,7 @@ namespace BroWar.Debugging.Console
             }
         }
 
+        internal ConsoleManagerSettings Settings => settings;
         public IReadOnlyDictionary<string, HashSet<MethodInfo>> RegisteredMethods => namesToMethods;
     }
 }
