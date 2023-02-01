@@ -43,7 +43,6 @@ namespace BroWar.Debugging.Console
         public static bool TryExtractArguments(string input, string encapsulationCharacter, out string[] arguments)
         {
             var encapsulatingCharactersCount = Regex.Matches(input, encapsulationCharacter).Count;
-
             if (encapsulatingCharactersCount % 2 != 0)
             {
                 arguments = Array.Empty<string>();
