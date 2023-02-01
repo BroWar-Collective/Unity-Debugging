@@ -16,7 +16,8 @@ namespace BroWar.Debugging.Tests
         [TestCase("CommandName arg1 \"arg2.1 arg2.2\" \" arg3.1 arg3.2\"", new string[] { "arg1", "arg2.1 arg2.2", " arg3.1 arg3.2" })]
         public void TestMultiArgumentExtraction(string input, string[] expectedOutput)
         {
-            Assert.AreEqual(ConsoleUtility.ExtractArguments(input, "\""), expectedOutput);
+            ConsoleUtility.TryExtractArguments(input, "\"", out var arguments);
+            Assert.AreEqual(arguments, expectedOutput);
         }
 
         [TestCase("CommandName \"invalid input")]
@@ -25,9 +26,9 @@ namespace BroWar.Debugging.Tests
         [TestCase("CommandName invalid input\"\"\"")]
         [TestCase("CommandName \"arg1.1 arg 1.2\" \"arg2.1 arg2.2")]
         [TestCase("CommandName \"arg1.1 arg 1.2\" arg2.1 arg2.2\"")]
-        public void TestMultiArgumentExtractionExceptions(string input)
+        public void TestMultiArgumentExtractionEncapsulationFailsafe(string input)
         {
-            Assert.Throws<ArgumentExtractionException>(() => ConsoleUtility.ExtractArguments(input, "\""));
+            Assert.AreEqual(ConsoleUtility.TryExtractArguments(input, "\"", out var arguments), false);
         }
     }
 }
